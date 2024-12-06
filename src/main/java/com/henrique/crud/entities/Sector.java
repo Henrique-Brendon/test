@@ -8,14 +8,13 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.springframework.data.annotation.Id;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.henrique.crud.entities.enums.SectorType;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.Id; // Alterado para o pacote correto
 import jakarta.persistence.OneToMany;
 
 @Entity
@@ -30,7 +29,7 @@ public class Sector implements Serializable {
 	private SectorType type;
 	
 	@JsonIgnore
-	@OneToMany(mappedBy = "listCode")
+	@OneToMany(mappedBy = "sector")
 	private List<Product> listProducts = new ArrayList<>();
 	
 	private static final Map<String, SectorType> PRODUCT_SECTORS = Map.of(
@@ -53,10 +52,13 @@ public class Sector implements Serializable {
 	    SECTOR_TYPE_TO_ID.put(SectorType.SMARTPHONE, 4L);
 	}
 	
-	public Sector(SectorType type) {
+	public Sector() {
+	
+	}
+	
+	private Sector(SectorType type) {
 		this.type = type;
 	}
-
 	public Long getId() {
 		return id;
 	}

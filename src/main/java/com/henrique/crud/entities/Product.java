@@ -5,11 +5,10 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Objects;
 
-import org.springframework.data.annotation.Id;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id; // Alterado para o pacote correto
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 
@@ -35,6 +34,10 @@ public class Product implements Serializable {
 	@ManyToOne
 	@JoinColumn(name = "listCode")
 	private ListCode listCode;
+	
+	public Product() {
+		
+	}
 	
 	public Product(Long id, String name, String characteristics, BigDecimal cost, BigDecimal price, Instant dateEntry,
 			Instant dateExit, Sector sector, ListCode listCode) {
