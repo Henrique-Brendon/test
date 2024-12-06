@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import com.henrique.crud.entities.enums.SectorType;
+
 public class Sector {
 
 	private Long id;
@@ -12,7 +14,7 @@ public class Sector {
 	
 	private List<Product> listProducts = new ArrayList<>();
 	
-	public Sector(SectorType name) {
+	public Sector(SectorType type) {
 		this.type = type;
 	}
 
