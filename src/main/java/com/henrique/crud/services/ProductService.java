@@ -1,5 +1,10 @@
 package com.henrique.crud.services;
 
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,10 +30,24 @@ public class ProductService {
 		
 		listProducts.forEach(product -> {
 			listProductsDTO.add(new ProductDTO(product.getId(), product.getName(), product.getCharacteristics(),
-				product.getCost(), product.getPrice(), product.getDateEntry(), product.getDateExit(),
-				product.getSector(), product.getListCode()));
+				formatCurrency(product.getCost()), formatCurrency(product.getPrice()), formatDate(product.getDateEntry()),
+				formatDate(product.getDateExit()), product.getSector().getName(), product.getListCode()));
 		});
 		
 		return listProductsDTO;
+	}
+	
+	private String formatDate(Instant date) {
+		DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy").withZone(ZoneId.systemDefault());
+		
+		String formattedDate = fmt.format(date);
+		return formattedDate;
+	}
+	
+	private String formatCurrency(BigDecimal valueBigDecimal) {
+		DecimalFormat fmt = new DecimalFormat("0.00 'R$'");
+		
+		String formattedValue = fmt.format(valueBigDecimal);
+		return formattedValue;
 	}
 }
