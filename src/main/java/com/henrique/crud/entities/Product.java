@@ -5,10 +5,21 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Objects;
 
+import org.springframework.data.annotation.Id;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+
+@Entity
 public class Product implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	private String name;
 	private String characteristics;
@@ -17,8 +28,12 @@ public class Product implements Serializable {
 	private Instant dateEntry;
 	private Instant dateExit;
 	
+	@ManyToOne
+	@JoinColumn(name = "sector")
 	private Sector sector;
 	
+	@ManyToOne
+	@JoinColumn(name = "listCode")
 	private ListCode listCode;
 	
 	public Product(Long id, String name, String characteristics, BigDecimal cost, BigDecimal price, Instant dateEntry,

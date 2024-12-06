@@ -1,15 +1,28 @@
 package com.henrique.crud.entities;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import org.springframework.data.annotation.Id;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.henrique.crud.entities.enums.SectorType;
 
-public class Sector {
+import jakarta.persistence.Entity;
+import jakarta.persistence.OneToMany;
 
+@Entity
+public class Sector implements Serializable {
+
+	private static final long serialVersionUID = 1L;
+
+	@Id
 	private Long id;
 	
+	@JsonIgnore
+	@OneToMany(mappedBy = "listCode")
 	private SectorType type;
 	
 	private List<Product> listProducts = new ArrayList<>();
