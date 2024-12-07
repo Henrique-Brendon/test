@@ -1,10 +1,6 @@
 package com.henrique.crud.dtos;
 
-import java.math.BigDecimal;
-import java.time.Instant;
-
 import com.henrique.crud.entities.ListCode;
-import com.henrique.crud.entities.Sector;
 import com.henrique.crud.entities.enums.SectorType;
 
 public record ProductDTO(
@@ -16,5 +12,5 @@ public record ProductDTO(
 	String dateEntry,
 	String dateExit,
 	SectorType sector,
-	ListCode listCode) {
+	String listCode) {
 }

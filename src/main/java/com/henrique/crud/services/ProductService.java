@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.henrique.crud.dtos.ProductDTO;
@@ -25,13 +26,22 @@ public class ProductService {
 		return convertProductDTO(repository.findAll());
 	}
 	
+	public List<ProductDTO> getAllProductsSort(String campo, String direcao) {
+		
+		Sort.Direction direction = "DESC".equalsIgnoreCase(direcao) ? Sort.Direction.DESC : Sort.Direction.ASC;
+		Sort sort = Sort.by(direction, campo);
+		
+		return convertProductDTO(repository.findAll(sort));
+
+	}
+	
 	private List<ProductDTO> convertProductDTO(List<Product> listProducts) {
 		List<ProductDTO> listProductsDTO = new ArrayList<>();
 		
 		listProducts.forEach(product -> {
 			listProductsDTO.add(new ProductDTO(product.getId(), product.getName(), product.getCharacteristics(),
 				formatCurrency(product.getCost()), formatCurrency(product.getPrice()), formatDate(product.getDateEntry()),
-				formatDate(product.getDateExit()), product.getSector().getName(), product.getListCode()));
+				formatDate(product.getDateExit()), product.getSector().getName(), product.getListCode().getCode()));
 		});
 		
 		return listProductsDTO;
