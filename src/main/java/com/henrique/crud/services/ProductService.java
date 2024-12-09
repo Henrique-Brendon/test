@@ -3,17 +3,21 @@ package com.henrique.crud.services;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.henrique.crud.dtos.ProductDTO;
+import com.henrique.crud.entities.ListCode;
 import com.henrique.crud.entities.Product;
+import com.henrique.crud.entities.Sector;
 import com.henrique.crud.repositories.ProductRepository;
 
 @Service
@@ -27,13 +31,22 @@ public class ProductService {
 	}
 	
 	public List<ProductDTO> getAllProductsSort(String campo, String direcao) {
-		
 		Sort.Direction direction = "DESC".equalsIgnoreCase(direcao) ? Sort.Direction.DESC : Sort.Direction.ASC;
 		Sort sort = Sort.by(direction, campo);
 		
 		return convertProductDTO(repository.findAll(sort));
-
 	}
+	
+	public void insert(ProductDTO productDTO) {
+		repository.save(convertProductDtoToProduct(productDTO));
+	}
+	
+    public List<Product> insertProducts(List<ProductDTO> productDTOs) {
+        List<Product> products = productDTOs.stream()
+                .map(this::convertProductDtoToProduct)
+                .collect(Collectors.toList());
+        return repository.saveAll(products); // Salva a lista inteira de uma vez
+    }
 	
 	private List<ProductDTO> convertProductDTO(List<Product> listProducts) {
 		List<ProductDTO> listProductsDTO = new ArrayList<>();
@@ -60,4 +73,26 @@ public class ProductService {
 		String formattedValue = fmt.format(valueBigDecimal);
 		return formattedValue;
 	}
+	
+    private Product convertProductDtoToProduct(ProductDTO productDTO) {
+        return new Product(
+            null,
+            productDTO.name(),
+            productDTO.characteristics(),
+            new BigDecimal(productDTO.cost().trim()),
+            new BigDecimal(productDTO.price().trim()),
+            formatInstant(productDTO.dateEntry()),
+            formatInstant(productDTO.dateExit()),
+            new Sector().mapSector(productDTO.name()),
+            new ListCode(productDTO.listCode())
+        );
+    }
+	
+	private Instant formatInstant(String date) {
+		DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+		
+		LocalDate localDate = LocalDate.parse(date, fmt);
+		return localDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
+	}
+	
 }

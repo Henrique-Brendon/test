@@ -31,6 +31,10 @@ public class ListCode implements Serializable {
 		
 	}
 	
+	public ListCode(String code) {
+		this.code = code;
+	}
+		
 	public ListCode(Long id, String code) {
 		this.id = id;
 		this.code = code;
