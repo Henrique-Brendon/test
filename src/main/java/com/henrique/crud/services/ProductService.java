@@ -18,6 +18,7 @@ import com.henrique.crud.dtos.ProductDTO;
 import com.henrique.crud.entities.ListCode;
 import com.henrique.crud.entities.Product;
 import com.henrique.crud.entities.Sector;
+import com.henrique.crud.entities.enums.SectorType;
 import com.henrique.crud.repositories.ProductRepository;
 import com.henrique.crud.services.exceptions.ServiceException;
 
@@ -50,12 +51,15 @@ public class ProductService extends BaseService{
         return execute(() -> repository.save(convertProductDtoToProduct(productDTO)), "Error inserting product");
     }
 	
-    public List<Product> insertProducts(List<ProductDTO> productDTOs) {
-        List<Product> products = productDTOs.stream()
-                .map(this::convertProductDtoToProduct)
-                .collect(Collectors.toList());
-        return repository.saveAll(products); // Salva a lista inteira de uma vez
-    }
+   public List<Product> insertProducts(List<ProductDTO> productDTOs) {
+	    return execute(() -> {
+	        List<Product> products = productDTOs.stream()
+	                .map(this::convertProductDtoToProduct)
+	                .collect(Collectors.toList());
+	        return repository.saveAll(products); // Salva a lista inteira de uma vez
+	    }, "Error saving products");
+	}
+
     
     public Product update(Long id, ProductDTO productDTO) {
     	return execute(() -> {
@@ -67,46 +71,46 @@ public class ProductService extends BaseService{
     	}, "Error updating product with ID:" + id);
     	
     }
+	
+    private List<ProductDTO> convertProductDTO(List<Product> listProducts) {
+        List<ProductDTO> listProductsDTO = new ArrayList<>();
 
-    private void updateData(Product entity, ProductDTO productDTO) {
-        try {
-            entity.setName(productDTO.name());
-            entity.setCharacteristics(productDTO.characteristics());
-            entity.setCost(new BigDecimal(productDTO.cost().trim()));
-            entity.setPrice(new BigDecimal(productDTO.price().trim()));
-            entity.setDateEntry(formatInstant(productDTO.dateEntry()));
-            entity.setDateExit(formatInstant(productDTO.dateExit()));
-            entity.setSector(new Sector().mapSector(productDTO.name()));
-            entity.setListCode(new ListCode(productDTO.name()));
-        } catch (IllegalArgumentException e) {
-            throw new ServiceException("Invalid data for updating product: " + productDTO.name(), e);
-        }
+        listProducts.forEach(product -> {
+            // Mapeamento para o tipo correto de 'sector' (SectorType)
+            SectorType sectorType = (product.getSector() != null) ? product.getSector().getName() : SectorType.DEFAULT;
+
+            // Constrói o DTO com o sector correto (agora do tipo 'SectorType')
+            listProductsDTO.add(new ProductDTO(
+                product.getId(),
+                product.getName(),
+                product.getCharacteristics(),
+                formatCurrency(product.getCost()),
+                formatCurrency(product.getPrice()),
+                formatDate(product.getDateEntry()),
+                formatDate(product.getDateExit()),
+                sectorType, // Agora passa o SectorType diretamente
+                product.getListCode().getCode()
+            ));
+        });
+
+        return listProductsDTO;
     }
-	
-	private List<ProductDTO> convertProductDTO(List<Product> listProducts) {
-		List<ProductDTO> listProductsDTO = new ArrayList<>();
-		
-		listProducts.forEach(product -> {
-			listProductsDTO.add(new ProductDTO(product.getId(), product.getName(), product.getCharacteristics(),
-				formatCurrency(product.getCost()), formatCurrency(product.getPrice()), formatDate(product.getDateEntry()),
-				formatDate(product.getDateExit()), product.getSector().getName(), product.getListCode().getCode()));
-		});
-		
-		return listProductsDTO;
-	}
-	
-	private String formatDate(Instant date) {
-		DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy").withZone(ZoneId.systemDefault());
-		
-		String formattedDate = fmt.format(date);
-		return formattedDate;
-	}
+
 	
 	private String formatCurrency(BigDecimal valueBigDecimal) {
-		DecimalFormat fmt = new DecimalFormat("0.00 'R$'");
-		
-		String formattedValue = fmt.format(valueBigDecimal);
-		return formattedValue;
+	    if (valueBigDecimal == null) {
+	        throw new IllegalArgumentException("Currency value cannot be null");
+	    }
+	    DecimalFormat fmt = new DecimalFormat("0.00 'R$'");
+	    return fmt.format(valueBigDecimal);
+	}
+
+	private String formatDate(Instant date) {
+	    if (date == null) {
+	        throw new IllegalArgumentException("Date cannot be null");
+	    }
+	    DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy").withZone(ZoneId.systemDefault());
+	    return fmt.format(date);
 	}
 	
     private Product convertProductDtoToProduct(ProductDTO productDTO) {
@@ -121,6 +125,21 @@ public class ProductService extends BaseService{
             new Sector().mapSector(productDTO.name()),
             new ListCode(productDTO.listCode())
         );
+    }
+    
+    private void updateData(Product entity, ProductDTO productDTO) {
+        try {
+            entity.setName(productDTO.name());
+            entity.setCharacteristics(productDTO.characteristics());
+            entity.setCost(new BigDecimal(productDTO.cost().trim()));
+            entity.setPrice(new BigDecimal(productDTO.price().trim()));
+            entity.setDateEntry(formatInstant(productDTO.dateEntry()));
+            entity.setDateExit(formatInstant(productDTO.dateExit()));
+            entity.setSector(new Sector().mapSector(productDTO.name()));
+            entity.setListCode(new ListCode(productDTO.name()));
+        } catch (IllegalArgumentException e) {
+            throw new ServiceException("Invalid data for updating product: " + productDTO.name(), e);
+        }
     }
 	
 	private Instant formatInstant(String date) {
