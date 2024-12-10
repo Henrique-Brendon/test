@@ -3,6 +3,7 @@ package com.henrique.crud.services;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -20,6 +21,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.EmptyResultDataAccessException;
 
 import com.henrique.crud.dtos.ProductDTO;
 import com.henrique.crud.entities.Product;
@@ -61,6 +63,26 @@ public class ProductServiceTest {
     	when(repository.findById(1L)).thenReturn(Optional.empty());
     	
     	assertThrows(ServiceException.class, () -> service.findById(1L));
+    }
+    
+    @Test
+    void testDeleteById_Success() {
+    	Long validId = 1L;
+    	
+    	service.deleteById(validId);
+    	
+    	verify(repository, times(1)).deleteById(validId);
+    }
+    
+    @Test
+    void testDeleteById_NotFound() {
+    	Long invalidId = 99L;
+    	
+    	doThrow(new EmptyResultDataAccessException(1)).when(repository).deleteById(invalidId);
+    	
+    	assertThrows(ServiceException.class, () -> service.deleteById(invalidId));
+    	
+    	verify(repository, times(1)).deleteById(invalidId);
     }
     
     @Test
