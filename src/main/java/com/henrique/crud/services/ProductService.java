@@ -37,8 +37,8 @@ public class ProductService {
 		return convertProductDTO(repository.findAll(sort));
 	}
 	
-	public void insert(ProductDTO productDTO) {
-		repository.save(convertProductDtoToProduct(productDTO));
+	public Product insert(ProductDTO productDTO) {
+		return repository.save(convertProductDtoToProduct(productDTO));
 	}
 	
     public List<Product> insertProducts(List<ProductDTO> productDTOs) {
