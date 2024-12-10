@@ -56,6 +56,32 @@ public class ProductService extends BaseService{
                 .collect(Collectors.toList());
         return repository.saveAll(products); // Salva a lista inteira de uma vez
     }
+    
+    public Product update(Long id, ProductDTO productDTO) {
+    	return execute(() -> {
+    		Product entity = repository.findById(id).orElseThrow(() ->
+    			new ServiceException("Product not found with ID: " + id)
+			);
+    		updateData(entity, productDTO);
+    		return repository.save(entity);
+    	}, "Error updating product with ID:" + id);
+    	
+    }
+
+    private void updateData(Product entity, ProductDTO productDTO) {
+        try {
+            entity.setName(productDTO.name());
+            entity.setCharacteristics(productDTO.characteristics());
+            entity.setCost(new BigDecimal(productDTO.cost().trim()));
+            entity.setPrice(new BigDecimal(productDTO.price().trim()));
+            entity.setDateEntry(formatInstant(productDTO.dateEntry()));
+            entity.setDateExit(formatInstant(productDTO.dateExit()));
+            entity.setSector(new Sector().mapSector(productDTO.name()));
+            entity.setListCode(new ListCode(productDTO.name()));
+        } catch (IllegalArgumentException e) {
+            throw new ServiceException("Invalid data for updating product: " + productDTO.name(), e);
+        }
+    }
 	
 	private List<ProductDTO> convertProductDTO(List<Product> listProducts) {
 		List<ProductDTO> listProductsDTO = new ArrayList<>();

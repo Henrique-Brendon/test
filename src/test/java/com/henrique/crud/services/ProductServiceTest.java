@@ -112,7 +112,32 @@ public class ProductServiceTest {
     	//assertEquals("Error inserting product", exception.getMessage());
     	//assertTrue(exception.getMessage().contains("Error inserting product"));
     }
- 
+    
+    @Test
+    void testUpdate_Sucess() {
+    	when(repository.findById(1L)).thenReturn(Optional.of(listProducts.get(1)));
+    	when(repository.save(any(Product.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    	
+    	Product product = service.update(1L, listProductsDTOs.get(1));
+    	
+    	assertEquals(listProductsDTOs.get(1).name(), product.getName());
+    	assertEquals(listProductsDTOs.get(1).characteristics(), product.getCharacteristics());
+    	
+    	verify(repository, times(1)).findById(1L);
+    	verify(repository, times(1)).save(listProducts.get(1));
+    }
+    
+    
+    @Test
+    void testUpdate_NotFound() {
+    	when(repository.findById(99L)).thenReturn(Optional.empty());
+    	
+    	assertThrows(ServiceException.class, () -> service.update(99L, listProductsDTOs.get(1)));
+    	
+    	verify(repository, times(1)).findById(99L);
+    	verify(repository, times(0)).save(any(Product.class));
+    }
+ 	
     void startList() {
 		listProducts = Arrays.asList(
 			    new Product(1L, "RX 560", "", new BigDecimal("200.00"), new BigDecimal("300.00"), Instant.now(), Instant.now(), null, null),
