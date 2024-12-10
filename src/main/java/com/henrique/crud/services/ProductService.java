@@ -19,6 +19,7 @@ import com.henrique.crud.entities.ListCode;
 import com.henrique.crud.entities.Product;
 import com.henrique.crud.entities.Sector;
 import com.henrique.crud.repositories.ProductRepository;
+import com.henrique.crud.services.exceptions.ServiceException;
 
 @Service
 public class ProductService extends BaseService{
@@ -36,6 +37,14 @@ public class ProductService extends BaseService{
 		
 		return convertProductDTO(repository.findAll(sort));
 	}
+	
+	public Product findById(Long id) {
+		return repository.findById(id).orElseThrow(() -> new ServiceException("Product not found with ID: " + id));
+	}
+	
+    public void deleteById(Long id) {
+        execute(() -> repository.deleteById(id), "Error deleting product with id: " + id);
+    }
 	
    public Product insert(ProductDTO productDTO) {
         return execute(() -> repository.save(convertProductDtoToProduct(productDTO)), "Error inserting product");

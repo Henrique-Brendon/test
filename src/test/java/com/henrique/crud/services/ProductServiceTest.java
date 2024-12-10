@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,6 +44,23 @@ public class ProductServiceTest {
     	MockitoAnnotations.openMocks(this);
     	startList();
     	//BDDMockito.given(repository.save(ArgumentMatchers.any(Product.class))).willReturn(new Product());
+    }
+    
+    @Test
+    void testFindById_Success() {
+    	when(repository.findById(1L)).thenReturn(Optional.of(listProducts.get(0)));
+    	
+    	Product result = service.findById(1L);
+    	
+        assertEquals(1L, result.getId());
+        assertEquals(listProducts.get(0).getName(), result.getName());
+    }
+    
+    @Test
+    void testFindById_NotFound() {
+    	when(repository.findById(1L)).thenReturn(Optional.empty());
+    	
+    	assertThrows(ServiceException.class, () -> service.findById(1L));
     }
     
     @Test
