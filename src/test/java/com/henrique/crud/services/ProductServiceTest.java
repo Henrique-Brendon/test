@@ -1,6 +1,7 @@
 package com.henrique.crud.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -14,8 +15,6 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentMatchers;
-import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -25,6 +24,7 @@ import com.henrique.crud.dtos.ProductDTO;
 import com.henrique.crud.entities.Product;
 import com.henrique.crud.entities.enums.SectorType;
 import com.henrique.crud.repositories.ProductRepository;
+import com.henrique.crud.services.exceptions.ServiceException;
 
 @ExtendWith(MockitoExtension.class)
 public class ProductServiceTest {
@@ -61,6 +61,16 @@ public class ProductServiceTest {
         assertEquals(new BigDecimal(listProductsDTOs.get(0).cost()), result.getCost());
         // VERIFICAÇÃO: Verifica se o método 'save' do repositório foi chamado exatamente uma vez com qualquer instância de 'Product'.
         verify(repository, times(1)).save(any(Product.class));
+    }
+    
+    @Test
+    void testInsertWithInvalidData() {
+    	ProductDTO invalidProductDTO = new ProductDTO(null, null, "", "invalid-cost", "20.00", "10/12/2023", "11/12/2023", null, "Code1");
+    	assertThrows(ServiceException.class, () -> {
+    		service.insert(invalidProductDTO);
+    	});
+    	//assertEquals("Error inserting product", exception.getMessage());
+    	//assertTrue(exception.getMessage().contains("Error inserting product"));
     }
  
     void startList() {

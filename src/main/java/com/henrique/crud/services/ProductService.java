@@ -21,7 +21,7 @@ import com.henrique.crud.entities.Sector;
 import com.henrique.crud.repositories.ProductRepository;
 
 @Service
-public class ProductService {
+public class ProductService extends BaseService{
 
 	@Autowired
 	private ProductRepository repository;
@@ -37,9 +37,9 @@ public class ProductService {
 		return convertProductDTO(repository.findAll(sort));
 	}
 	
-	public Product insert(ProductDTO productDTO) {
-		return repository.save(convertProductDtoToProduct(productDTO));
-	}
+   public Product insert(ProductDTO productDTO) {
+        return execute(() -> repository.save(convertProductDtoToProduct(productDTO)), "Error inserting product");
+    }
 	
     public List<Product> insertProducts(List<ProductDTO> productDTOs) {
         List<Product> products = productDTOs.stream()
